@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import AddressContext from '../../context/AddressData';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy, IconCheck } from '@tabler/icons-react';
+import {useNavigate} from 'react-router-dom'
 
 interface Data {
   entryPoint: string;
@@ -23,6 +24,7 @@ const Main = () => {
   const [isLoading, setIsLoading] = useState({ load: false, method: '' });
   const { setContractAddress, contractAddress } = useContext(AddressContext);
   const clipboard = useClipboard();
+  const navigate= useNavigate();
 
   useEffect(() => {
     contractInstance()
@@ -139,6 +141,7 @@ const Main = () => {
               {contractAddress}
             </Button>
           </Tooltip>
+          <Button onClick= {()=>{navigate('/contracts')}} >Go to Contracts</Button>
         </Box>
       )}
     </Box>
