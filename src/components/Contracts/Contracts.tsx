@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Loader, Navbar, TextInput, createStyles, getStylesRef, rem } from '@mantine/core';
+import { useContext, useState, useEffect } from 'react';
+import { Box, Button, Loader, Navbar, Text, TextInput, Tooltip, createStyles, getStylesRef, rem } from '@mantine/core';
 import AddressContext from '../../context/AddressData';
 import { walletInstance } from '../../utils/wallet-instance';
 import { toast } from 'react-toastify';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
+import { useClipboard } from '@mantine/hooks';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -57,6 +59,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const data = [
+  { link: 'createWallet', label: 'Create Wallet' },
   { link: 'entryPoint', label: 'entryPoint' },
   { link: 'getDeposite', label: 'getDeposite' },
   { link: 'addDeposite', label: 'addDeposite' },
@@ -74,12 +77,12 @@ const Contracts = () => {
   const [active, setActive] = useState('entryPoint');
   const [wallet, setWallet] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    walletInstance(contractAddress).then((wallet) => {
-      setWallet(wallet);
-    });
-  }, []);
+  const { contractAddress } = useContext(AddressContext);
+  const [walletAddress, setWalletAddress] = useState<string>(contractAddress);
+  const [isWalletCreated, setIsWalletCreated] = useState<boolean>(false);
+  const [isActiveChanged, setIsActiveChanged] = useState<boolean>(false);
+  const [resultData, setResultData] = useState<string>('');
+  const clipboard = useClipboard();
 
   const links = data.map((item) => (
     <a
@@ -88,22 +91,34 @@ const Contracts = () => {
       key={item.label}
       onClick={(event) => {
         event.preventDefault();
-        setActive(item.label);
+        setActive(item.link);
       }}
     >
       <span>{item.label}</span>
     </a>
   ));
 
-  const { contractAddress } = useContext(AddressContext);
+  useEffect(() => {
+    setIsActiveChanged(false);
+  }, [active]);
 
   const generateHandler = () => {
     try {
       setIsLoading(true);
+      if (active === 'createWallet') {
+        walletInstance(walletAddress).then((wallet) => {
+          setWallet(wallet);
+          setIsWalletCreated(true);
+          console.log(wallet);
+          toast.info('wallet created successfully');
+        });
+      }
       if (active == 'entryPoint') {
         console.log(wallet);
         wallet.entryPoint().then((data: string) => {
           console.log({ data });
+          setResultData(data);
+          setIsActiveChanged(true);
         });
       }
       setIsLoading(false);
@@ -130,10 +145,66 @@ const Contracts = () => {
         }}
       >
         <Box w={400}>
-          <TextInput my={20} defaultValue={contractAddress} label="Contract Address" placeholder="Enter address here" />
-          <Button sx={{ justifySelf: 'flex-end' }} onClick={generateHandler}>
-            {isLoading ? <Loader variant="dots" color="#fff" /> : 'Generate'}
+          <TextInput
+            my={20}
+            value={walletAddress}
+            defaultValue={walletAddress}
+            onChange={(e: any) => setWalletAddress(e.target.value)}
+            label="Contract Address"
+            placeholder="Enter address here"
+            description={active === 'createWallet' ? '*Enter new contract address or continue with generated one' : ''}
+          />
+          <Button
+            sx={{ justifySelf: 'flex-end' }}
+            onClick={generateHandler}
+            disabled={walletAddress === '' || (active !== 'createWallet' && !isWalletCreated)}
+          >
+            {isLoading ? (
+              <Loader variant="dots" color="#fff" />
+            ) : active === 'createWallet' ? (
+              'Create new Wallet'
+            ) : (
+              'Generate'
+            )}
           </Button>
+
+          <hr />
+
+          {isActiveChanged && (
+            <Box mt={20} maw={500} mx="auto">
+              <Text color="grey" mb={15}>
+                Your Generated {active}:{' '}
+              </Text>
+              <Tooltip
+                label={`${active} copied!`}
+                offset={5}
+                position="bottom"
+                radius="xl"
+                transitionProps={{ duration: 100, transition: 'slide-down' }}
+                opened={clipboard.copied}
+              >
+                <Button
+                  variant="light"
+                  rightIcon={
+                    clipboard.copied ? (
+                      <IconCheck size="1.2rem" stroke={1.5} />
+                    ) : (
+                      <IconCopy size="1.2rem" stroke={1.5} />
+                    )
+                  }
+                  radius="xl"
+                  size="md"
+                  styles={{
+                    root: { paddingRight: rem(14), height: rem(48) },
+                    rightIcon: { marginLeft: rem(22) },
+                  }}
+                  onClick={() => clipboard.copy(resultData)}
+                >
+                  {resultData}
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
