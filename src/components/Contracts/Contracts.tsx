@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Button, Loader, Navbar, Text, TextInput, Tooltip, createStyles, getStylesRef, rem } from '@mantine/core';
 import AddressContext from '../../context/AddressData';
 import { walletInstance } from '../../utils/wallet-instance';
@@ -63,11 +63,11 @@ const data = [
   { link: 'entryPoint', label: 'entryPoint' },
   { link: 'getDeposite', label: 'getDeposite' },
   { link: 'addDeposite', label: 'addDeposite' },
-  { link: 'addRescueWallett', label: 'addRescueWallet' },
-  { link: 'seeEntryPointAddress', label: 'seeEntryPointAddress' },
+  { link: 'addRescueWallet', label: 'addRescueWallet' },
+  { link: 'setEntryPointAdress', label: 'setEntryPointAdress' },
   { link: 'execute', label: 'execute' },
   { link: 'revokeRescueWallet', label: 'revokeRescueWallet' },
-  { link: 'setEntryPointAddress', label: 'setEntryPointAddress' },
+  //   { link: 'setEntryPointAdress', label: 'setEntryPointAdress' },
   { link: 'transferETH', label: 'transferETH' },
   { link: 'transferOwnerShip', label: 'transferOwnerShip' },
 ];
@@ -80,8 +80,8 @@ const Contracts = () => {
   const { contractAddress } = useContext(AddressContext);
   const [walletAddress, setWalletAddress] = useState<string>(contractAddress);
   const [isWalletCreated, setIsWalletCreated] = useState<boolean>(false);
-  const [isActiveChanged, setIsActiveChanged] = useState<boolean>(false);
-  const [resultData, setResultData] = useState<string>('');
+  const [resultData, setResultData] = useState<any>({});
+  const [threshold, setThreshold] = useState<string>('');
   const clipboard = useClipboard();
 
   const links = data.map((item) => (
@@ -98,11 +98,7 @@ const Contracts = () => {
     </a>
   ));
 
-  useEffect(() => {
-    setIsActiveChanged(false);
-  }, [active]);
-
-  const generateHandler = () => {
+  const generateHandler = async () => {
     try {
       setIsLoading(true);
       if (active === 'createWallet') {
@@ -113,12 +109,38 @@ const Contracts = () => {
           toast.info('wallet created successfully');
         });
       }
-      if (active == 'entryPoint') {
+      if (active === 'entryPoint') {
         console.log(wallet);
         wallet.entryPoint().then((data: string) => {
           console.log({ data });
-          setResultData(data);
-          setIsActiveChanged(true);
+          setResultData((prev: any) => ({ ...prev, entryPoint: data }));
+        });
+      }
+      if (active === 'getDeposite') {
+        wallet.getDeposite().then((data: any) => {
+          console.log({ data });
+          setResultData((prev: any) => ({ ...prev, getDeposite: data }));
+        });
+      }
+      if (active === 'addDeposite') {
+        wallet.addDeposite({ value: walletAddress }).then((data: any) => {
+          console.log({ data });
+          setResultData((prev: any) => ({ ...prev, addDeposite: 'Transaction successful!!!' }));
+          toast.info('Transaction successful');
+        });
+      }
+      if (active == 'addRescueWallet') {
+        wallet.addRescueWallet([walletAddress], threshold).then((data: any) => {
+          console.log({ data });
+          setResultData((prev: any) => ({ ...prev, addRescueWallet: 'Transaction successful!!!' }));
+          toast.info('Transaction successful');
+        });
+      }
+      if (active === 'setEntryPointAdress') {
+        wallet.setEntryPointAdress(walletAddress).then((data: any) => {
+          console.log({ data });
+          setResultData((prev: any) => ({ ...prev, setEntryPointAdress: 'Transaction successful!!!' }));
+          toast.info('Transaction successful');
         });
       }
       setIsLoading(false);
@@ -145,15 +167,31 @@ const Contracts = () => {
         }}
       >
         <Box w={400}>
-          <TextInput
-            my={20}
-            value={walletAddress}
-            defaultValue={walletAddress}
-            onChange={(e: any) => setWalletAddress(e.target.value)}
-            label="Contract Address"
-            placeholder="Enter address here"
-            description={active === 'createWallet' ? '*Enter new contract address or continue with generated one' : ''}
-          />
+          {active !== 'getDeposite' && (
+            <TextInput
+              my={20}
+              value={walletAddress}
+              defaultValue={walletAddress}
+              onChange={(e: any) => setWalletAddress(e.target.value)}
+              label="Contract Address"
+              placeholder={
+                active == 'addDeposite' ? 'How much you wanna deposit into an entry Contract?' : 'Enter address here'
+              }
+              description={
+                active === 'createWallet' ? '*Enter new contract address or continue with generated one' : ''
+              }
+            />
+          )}
+          {active === 'addRescueWallet' && (
+            <TextInput
+              my={20}
+              value={threshold}
+              defaultValue={threshold}
+              onChange={(e: any) => setThreshold(e.target.value)}
+              label="Threshold(unit16)"
+              placeholder="Enter threshold here"
+            />
+          )}
           <Button
             sx={{ justifySelf: 'flex-end' }}
             onClick={generateHandler}
@@ -164,47 +202,48 @@ const Contracts = () => {
             ) : active === 'createWallet' ? (
               'Create new Wallet'
             ) : (
-              'Generate'
+              'Generate ' + active
             )}
           </Button>
 
-          <hr />
-
-          {isActiveChanged && (
-            <Box mt={20} maw={500} mx="auto">
-              <Text color="grey" mb={15}>
-                Your Generated {active}:{' '}
-              </Text>
-              <Tooltip
-                label={`${active} copied!`}
-                offset={5}
-                position="bottom"
-                radius="xl"
-                transitionProps={{ duration: 100, transition: 'slide-down' }}
-                opened={clipboard.copied}
-              >
-                <Button
-                  variant="light"
-                  rightIcon={
-                    clipboard.copied ? (
-                      <IconCheck size="1.2rem" stroke={1.5} />
-                    ) : (
-                      <IconCopy size="1.2rem" stroke={1.5} />
-                    )
-                  }
+          {resultData?.[active] &&
+            (active === 'addDeposite' || active === 'addRescueWallet' || active === 'setEntryPointAdress' ? (
+              <Text color="grey"> {resultData?.[active]} </Text>
+            ) : (
+              <Box mt={20} maw={500} mx="auto">
+                <Text color="grey" mb={15}>
+                  Your Generated {active}:{' '}
+                </Text>
+                <Tooltip
+                  label={`${active} copied!`}
+                  offset={5}
+                  position="bottom"
                   radius="xl"
-                  size="md"
-                  styles={{
-                    root: { paddingRight: rem(14), height: rem(48) },
-                    rightIcon: { marginLeft: rem(22) },
-                  }}
-                  onClick={() => clipboard.copy(resultData)}
+                  transitionProps={{ duration: 100, transition: 'slide-down' }}
+                  opened={clipboard.copied}
                 >
-                  {resultData}
-                </Button>
-              </Tooltip>
-            </Box>
-          )}
+                  <Button
+                    variant="light"
+                    rightIcon={
+                      clipboard.copied ? (
+                        <IconCheck size="1.2rem" stroke={1.5} />
+                      ) : (
+                        <IconCopy size="1.2rem" stroke={1.5} />
+                      )
+                    }
+                    radius="xl"
+                    size="md"
+                    styles={{
+                      root: { paddingRight: rem(14), height: rem(48) },
+                      rightIcon: { marginLeft: rem(22) },
+                    }}
+                    onClick={() => clipboard.copy(resultData?.[active])}
+                  >
+                    {resultData?.[active]}
+                  </Button>
+                </Tooltip>
+              </Box>
+            ))}
         </Box>
       </Box>
     </Box>
