@@ -1,7 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Box, Navbar, createStyles, getStylesRef, rem } from '@mantine/core';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useContext, useEffect, useState } from 'react';
+import { Box, Button, Navbar, TextInput, createStyles, getStylesRef, rem } from '@mantine/core';
 import AddressContext from '../../context/AddressData';
 import { walletInstance } from '../../utils/wallet-instance';
+import { toast } from 'react-toastify';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -69,11 +71,12 @@ const data = [
 
 const Contracts = () => {
   const { classes, cx } = useStyles();
-  const [active, setActive] = useState('Billing');
+  const [active, setActive] = useState('entryPoint');
+  const [wallet, setWallet]= useState<any>();
 
   useEffect(() => {
-    walletInstance().then((wallet) => {
-      console.log({ wallet });
+    walletInstance(contractAddress).then((wallet) => {
+        setWallet(wallet);
     });
   }, []);
 
@@ -92,14 +95,43 @@ const Contracts = () => {
   ));
 
   const { contractAddress } = useContext(AddressContext);
-  console.log(contractAddress);
+
+  const generateHandler= ()=>{
+    try{
+
+        if(active=='entryPoint'){
+        console.log(wallet)    
+            wallet.entryPoint().then((data:string)=>{
+                console.log({data})
+            })
+        }
+    }catch(err: any){
+        toast.error(err.message)
+    }
+  }
+
   return (
-    <React.Fragment>
-      <Navbar height="100vh" width={{ sm: 300 }} p="md">
+    <Box sx={{ display: 'flex' }}>
+      <Navbar height="100%" width={{ sm: 300 }} sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }} p="md">
         <Navbar.Section grow>{links}</Navbar.Section>
       </Navbar>
-      <Box></Box>
-    </React.Fragment>
+      <Box
+        sx={{
+          alignSelf: 'center',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignContent: 'center',
+          flexWrap: 'wrap',
+        }}
+      >
+        <Box w={400}>
+          <TextInput my={20} defaultValue={contractAddress} label="Contract Address" placeholder="Enter address here" />
+          <Button sx={{ justifySelf: 'flex-end' }} onClick= {generateHandler} >Generate</Button>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 export default Contracts;

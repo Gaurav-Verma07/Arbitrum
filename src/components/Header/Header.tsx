@@ -2,6 +2,7 @@ import { createStyles, Header, Group, Burger, Container, rem, Image } from '@man
 import { useDisclosure } from '@mantine/hooks';
 import Arbitrum from '../../assets/arbitrum.png';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = createStyles((theme) => ({
   inner: {
@@ -46,12 +47,20 @@ const useStyles = createStyles((theme) => ({
 export function HeaderMenu() {
   const [opened, { toggle }] = useDisclosure(false);
   const { classes } = useStyles();
+  const navigate = useNavigate();
 
   return (
     <Header height={70}>
       <Container>
         <div className={classes.inner}>
-          <Image src={Arbitrum} width={60} height={60} />
+          <Image
+            src={Arbitrum}
+            width={60}
+            height={60}
+            onClick={() => {
+              navigate('/');
+            }}
+          />
           <ConnectButton />
           <Group spacing={5} className={classes.links}></Group>
           <Burger opened={opened} onClick={toggle} className={classes.burger} size="sm" />
