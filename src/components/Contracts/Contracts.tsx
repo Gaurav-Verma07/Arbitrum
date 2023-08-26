@@ -6,6 +6,7 @@ import { walletInstance } from '../../utils/wallet-instance';
 import { toast } from 'react-toastify';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { useClipboard } from '@mantine/hooks';
+import { data } from './data';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -58,19 +59,6 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const data = [
-  { link: 'createWallet', label: 'Create Wallet' },
-  { link: 'entryPoint', label: 'entryPoint' },
-  { link: 'getDeposite', label: 'getDeposite' },
-  { link: 'addDeposite', label: 'addDeposite' },
-  { link: 'addRescueWallet', label: 'addRescueWallet' },
-  { link: 'setEntryPointAdress', label: 'setEntryPointAdress' },
-  { link: 'execute', label: 'execute' },
-  { link: 'revokeRescueWallet', label: 'revokeRescueWallet' },
-  //   { link: 'setEntryPointAdress', label: 'setEntryPointAdress' },
-  { link: 'transferETH', label: 'transferETH' },
-  { link: 'transferOwnerShip', label: 'transferOwnerShip' },
-];
 
 const Contracts = () => {
   const { classes, cx } = useStyles();
