@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { useClipboard } from '@mantine/hooks';
 import { data } from './data';
+import { ethers } from 'ethers';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -59,7 +60,6 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-
 const Contracts = () => {
   const { classes, cx } = useStyles();
   const [active, setActive] = useState('entryPoint');
@@ -70,6 +70,7 @@ const Contracts = () => {
   const [isWalletCreated, setIsWalletCreated] = useState<boolean>(false);
   const [resultData, setResultData] = useState<any>({});
   const [threshold, setThreshold] = useState<string>('');
+  const [data256, setData256] = useState<string>('');
   const clipboard = useClipboard();
 
   const links = data.map((item) => (
@@ -131,6 +132,29 @@ const Contracts = () => {
           toast.info('Transaction successful');
         });
       }
+      if (active === 'execute') {
+        const userInputwei = ethers.utils.parseEther(threshold);
+        wallet.execute(walletAddress, userInputwei, data256).then((data: any) => {
+          console.log({ data });
+        });
+      }
+      if (active === 'revokeRescueWallet') {
+        wallet.revokeRescueWallet(walletAddress, threshold).then((data: any) => {
+          console.log({ data });
+        });
+      }
+      if (active === 'transferETH') {
+        wallet.transferETH(walletAddress, data256).then((data: any) => {
+          console.log({ data });
+        });
+      }
+      if (active === 'transferOwnership') {
+        wallet.transferOwnership(walletAddress).then((data: any) => {
+            console.log({data})
+          setResultData((prev: any) => ({ ...prev, transferOwnership: 'Transaction successful!!!' }));
+          toast.info('Transaction successful');
+        });
+      }
       setIsLoading(false);
     } catch (err: any) {
       toast.error(err.message);
@@ -170,14 +194,23 @@ const Contracts = () => {
               }
             />
           )}
-          {active === 'addRescueWallet' && (
+          {(active === 'addRescueWallet' || active === 'revokeRescueWallet' || active === 'execute') && (
             <TextInput
               my={20}
               value={threshold}
               defaultValue={threshold}
               onChange={(e: any) => setThreshold(e.target.value)}
-              label="Threshold(unit16)"
-              placeholder="Enter threshold here"
+              label={active === 'execute' ? '_value(unit256)' : 'Threshold(unit16)'}
+              placeholder={active === 'execute' ? 'Enter value here' : 'Enter threshold here'}
+            />
+          )}
+          {(active === 'execute' || active === 'transferETH') && (
+            <TextInput
+              my={20}
+              label={active === 'transferETH' ? 'amount (unit256)' : '_data(bytes)'}
+              value={data256}
+              onChange={(e: any) => setData256(e.target.value)}
+              placeholder={active === 'transferETH' ? 'Enter amount here' : 'Enter data here'}
             />
           )}
           <Button
@@ -195,7 +228,10 @@ const Contracts = () => {
           </Button>
 
           {resultData?.[active] &&
-            (active === 'addDeposite' || active === 'addRescueWallet' || active === 'setEntryPointAdress' ? (
+            (active === 'addDeposite' ||
+            active === 'addRescueWallet' ||
+            active === 'setEntryPointAdress' ||
+            active === 'transferOwnership' ? (
               <Text color="grey"> {resultData?.[active]} </Text>
             ) : (
               <Box mt={20} maw={500} mx="auto">
