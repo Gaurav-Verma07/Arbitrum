@@ -48,7 +48,7 @@ export function HeaderMenu() {
   const { classes } = useStyles();
 
   return (
-    <Header height={70} mb={50}>
+    <Header height={70}>
       <Container>
         <div className={classes.inner}>
           <Image src={Arbitrum} width={60} height={60} />
