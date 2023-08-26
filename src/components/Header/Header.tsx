@@ -57,6 +57,7 @@ export function HeaderMenu() {
             src={Arbitrum}
             width={60}
             height={60}
+            sx={{cursor:'pointer'}}
             onClick={() => {
               navigate('/');
             }}

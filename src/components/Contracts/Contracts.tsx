@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Navbar, TextInput, createStyles, getStylesRef, rem } from '@mantine/core';
+import { Box, Button, Loader, Navbar, TextInput, createStyles, getStylesRef, rem } from '@mantine/core';
 import AddressContext from '../../context/AddressData';
 import { walletInstance } from '../../utils/wallet-instance';
 import { toast } from 'react-toastify';
@@ -72,11 +72,12 @@ const data = [
 const Contracts = () => {
   const { classes, cx } = useStyles();
   const [active, setActive] = useState('entryPoint');
-  const [wallet, setWallet]= useState<any>();
+  const [wallet, setWallet] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     walletInstance(contractAddress).then((wallet) => {
-        setWallet(wallet);
+      setWallet(wallet);
     });
   }, []);
 
@@ -96,19 +97,21 @@ const Contracts = () => {
 
   const { contractAddress } = useContext(AddressContext);
 
-  const generateHandler= ()=>{
-    try{
-
-        if(active=='entryPoint'){
-        console.log(wallet)    
-            wallet.entryPoint().then((data:string)=>{
-                console.log({data})
-            })
-        }
-    }catch(err: any){
-        toast.error(err.message)
+  const generateHandler = () => {
+    try {
+      setIsLoading(true);
+      if (active == 'entryPoint') {
+        console.log(wallet);
+        wallet.entryPoint().then((data: string) => {
+          console.log({ data });
+        });
+      }
+      setIsLoading(false);
+    } catch (err: any) {
+      toast.error(err.message);
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -128,7 +131,9 @@ const Contracts = () => {
       >
         <Box w={400}>
           <TextInput my={20} defaultValue={contractAddress} label="Contract Address" placeholder="Enter address here" />
-          <Button sx={{ justifySelf: 'flex-end' }} onClick= {generateHandler} >Generate</Button>
+          <Button sx={{ justifySelf: 'flex-end' }} onClick={generateHandler}>
+            {isLoading ? <Loader variant="dots" color="#fff" /> : 'Generate'}
+          </Button>
         </Box>
       </Box>
     </Box>
