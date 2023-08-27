@@ -25,7 +25,7 @@ module.exports = {
     arbitrumTestnet: {
       url: "https://arb-goerli.g.alchemy.com/v2/eOooH-_33r2FiZD9AwTNj8UXBJt7KITq",
       accounts: [
-        "2bca72c6d87160dd947814cff6cdd145d6f84a2b886a5dc779bb398220bbeb7c",
+        "",
       ],
       saveDeployments: true,
       chainId: 421613,
