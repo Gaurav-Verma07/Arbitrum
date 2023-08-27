@@ -113,7 +113,7 @@ const Contracts = () => {
       if (active === 'Get Deposite') {
         wallet.getDeposite().then((data: any) => {
           console.log({ data });
-          setResultData((prev: any) => ({ ...prev, getDeposite: data }));
+          setResultData((prev: any) => ({ ...prev, [active]: data.toString() }));
         });
       }
       if (active === 'Add Deposite') {
