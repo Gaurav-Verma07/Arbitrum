@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -130,10 +130,9 @@ const Contracts = () => {
         });
       }
       if (active === "Entry Point") {
-        console.log(wallet);
         wallet.entryPoint().then((data: string) => {
           console.log({ data });
-          setResultData((prev: any) => ({ ...prev, entryPoint: data }));
+          setResultData((prev: any) => ({ ...prev, [active]: data }));
         });
       }
       if (active === "Get Deposite") {
@@ -240,12 +239,13 @@ const Contracts = () => {
               value={walletAddress}
               defaultValue={walletAddress}
               onChange={(e: any) => setWalletAddress(e.target.value)}
-              label="Contract Address"
+              label={ active==='Transfer Ownership' ? 'Enter your new owner wallet' :active==="Add Deposite" ?"Add gas fee to entry contract" :"Contract Address"}
               placeholder={
                 active == "Add Deposite"
                   ? "How much you wanna deposit into an entry Contract?"
                   : "Enter address here"
               }
+              disabled={active==='Add Deposite'}
               description={
                 active === "Create Wallet"
                   ? "*Enter new contract address or continue with generated one"
@@ -269,10 +269,10 @@ const Contracts = () => {
               }
             />
           )}
-          {(active === "Execute" || active === "Transfer ETH") && (
+          {(active === "Execute" || active === "Transfer ETH" || active==="Add Deposite") && (
             <TextInput
               my={20}
-              label={active === "Transfer ETH" ? "Amount" : "Data"}
+              label={active === "Transfer ETH" || active==="Add Deposite" ? "Amount" : "Data"}
               value={data256}
               onChange={(e: any) => setData256(e.target.value)}
               placeholder={
@@ -283,7 +283,7 @@ const Contracts = () => {
             />
           )}
 
-          {active !== "Entry Point" && (
+          { (
             <Button
               sx={{ justifySelf: "flex-end" }}
               onClick={generateHandler}
@@ -302,7 +302,7 @@ const Contracts = () => {
             </Button>
           )}
 
-          {resultData?.[active] &&
+          {resultData?.[active]   &&
             (active === "Add Deposite" ||
             active === "Add Rescue Wallet" ||
             active === "Set EntryPoint Address" ||
