@@ -1,60 +1,89 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useState } from 'react';
-import { Box, Button, Loader, Navbar, Text, TextInput, Tooltip, createStyles, getStylesRef, rem } from '@mantine/core';
-import AddressContext from '../../context/AddressData';
-import { walletInstance } from '../../utils/wallet-instance';
-import { toast } from 'react-toastify';
-import { IconCheck, IconCopy } from '@tabler/icons-react';
-import { useClipboard } from '@mantine/hooks';
-import { data } from './data';
-import { ethers } from 'ethers';
+import { useContext, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Loader,
+  Navbar,
+  Text,
+  TextInput,
+  Tooltip,
+  createStyles,
+  getStylesRef,
+  rem,
+} from "@mantine/core";
+import AddressContext from "../../context/AddressData";
+import { walletInstance } from "../../utils/wallet-instance";
+import { toast } from "react-toastify";
+import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { useClipboard } from "@mantine/hooks";
+import { data } from "./data";
+import { ethers } from "ethers";
 
 const useStyles = createStyles((theme) => ({
   header: {
     paddingBottom: theme.spacing.md,
     marginBottom: `calc(${theme.spacing.md} * 1.5)`,
-    borderBottom: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+    borderBottom: `${rem(1)} solid ${
+      theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]
+    }`,
   },
 
   footer: {
     paddingTop: theme.spacing.md,
     marginTop: theme.spacing.md,
-    borderTop: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+    borderTop: `${rem(1)} solid ${
+      theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]
+    }`,
   },
 
   link: {
     ...theme.fn.focusStyles(),
-    display: 'flex',
-    alignItems: 'center',
-    textDecoration: 'none',
+    display: "flex",
+    alignItems: "center",
+    textDecoration: "none",
     fontSize: theme.fontSizes.sm,
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[1]
+        : theme.colors.gray[7],
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
 
-    '&:hover': {
-      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-      color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+    "&:hover": {
+      backgroundColor:
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[6]
+          : theme.colors.gray[0],
+      color: theme.colorScheme === "dark" ? theme.white : theme.black,
 
-      [`& .${getStylesRef('icon')}`]: {
-        color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+      [`& .${getStylesRef("icon")}`]: {
+        color: theme.colorScheme === "dark" ? theme.white : theme.black,
       },
     },
   },
 
   linkIcon: {
-    ref: getStylesRef('icon'),
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+    ref: getStylesRef("icon"),
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[2]
+        : theme.colors.gray[6],
     marginRight: theme.spacing.sm,
   },
 
   linkActive: {
-    '&, &:hover': {
-      backgroundColor: theme.fn.variant({ variant: 'light', color: theme.primaryColor }).background,
-      color: theme.fn.variant({ variant: 'light', color: theme.primaryColor }).color,
-      [`& .${getStylesRef('icon')}`]: {
-        color: theme.fn.variant({ variant: 'light', color: theme.primaryColor }).color,
+    "&, &:hover": {
+      backgroundColor: theme.fn.variant({
+        variant: "light",
+        color: theme.primaryColor,
+      }).background,
+      color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
+        .color,
+      [`& .${getStylesRef("icon")}`]: {
+        color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
+          .color,
       },
     },
   },
@@ -62,20 +91,22 @@ const useStyles = createStyles((theme) => ({
 
 const Contracts = () => {
   const { classes, cx } = useStyles();
-  const [active, setActive] = useState('entryPoint');
+  const [active, setActive] = useState("entryPoint");
   const [wallet, setWallet] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
   const { contractAddress } = useContext(AddressContext);
   const [walletAddress, setWalletAddress] = useState<string>(contractAddress);
   const [isWalletCreated, setIsWalletCreated] = useState<boolean>(false);
   const [resultData, setResultData] = useState<any>({});
-  const [threshold, setThreshold] = useState<string>('');
-  const [data256, setData256] = useState<string>('');
+  const [threshold, setThreshold] = useState<string>("");
+  const [data256, setData256] = useState<string>("");
   const clipboard = useClipboard();
 
   const links = data.map((item) => (
     <a
-      className={cx(classes.link, { [classes.linkActive]: item.label === active })}
+      className={cx(classes.link, {
+        [classes.linkActive]: item.label === active,
+      })}
       href={item.link}
       key={item.label}
       onClick={(event) => {
@@ -90,71 +121,90 @@ const Contracts = () => {
   const generateHandler = async () => {
     try {
       setIsLoading(true);
-      if (active === 'createWallet') {
+      if (active === "Create Wallet") {
         walletInstance(walletAddress).then((wallet) => {
           setWallet(wallet);
           setIsWalletCreated(true);
           console.log(wallet);
-          toast.info('wallet created successfully');
+          toast.info("wallet created successfully");
         });
       }
-      if (active === 'entryPoint') {
+      if (active === "Entry Point") {
         console.log(wallet);
         wallet.entryPoint().then((data: string) => {
           console.log({ data });
           setResultData((prev: any) => ({ ...prev, entryPoint: data }));
         });
       }
-      if (active === 'getDeposite') {
+      if (active === "Get Deposite") {
         wallet.getDeposite().then((data: any) => {
           console.log({ data });
           setResultData((prev: any) => ({ ...prev, getDeposite: data }));
         });
       }
-      if (active === 'addDeposite') {
-        wallet.addDeposite({ value: walletAddress }).then((data: any) => {
+      if (active === "Add Deposite") {
+        const userInputInWei = ethers.utils.parseEther(data256);
+        wallet.addDeposite({ value: userInputInWei }).then((data: any) => {
           console.log({ data });
-          setResultData((prev: any) => ({ ...prev, addDeposite: 'Transaction successful!!!' }));
-          toast.info('Transaction successful');
+          setResultData((prev: any) => ({
+            ...prev,
+            addDeposite: "Transaction successful!!!",
+          }));
+          toast.info("Transaction successful");
         });
       }
-      if (active == 'addRescueWallet') {
+      if (active == "Add Rescue Wallet") {
         wallet.addRescueWallet([walletAddress], threshold).then((data: any) => {
           console.log({ data });
-          setResultData((prev: any) => ({ ...prev, addRescueWallet: 'Transaction successful!!!' }));
-          toast.info('Transaction successful');
+          setResultData((prev: any) => ({
+            ...prev,
+            addRescueWallet: "Transaction successful!!!",
+          }));
+          toast.info("Transaction successful");
         });
       }
-      if (active === 'setEntryPointAdress') {
+      if (active === "Set EntryPoint Address") {
         wallet.setEntryPointAdress(walletAddress).then((data: any) => {
           console.log({ data });
-          setResultData((prev: any) => ({ ...prev, setEntryPointAdress: 'Transaction successful!!!' }));
-          toast.info('Transaction successful');
+          setResultData((prev: any) => ({
+            ...prev,
+            setEntryPointAdress: "Transaction successful!!!",
+          }));
+          toast.info("Transaction successful");
         });
       }
-      if (active === 'execute') {
+      if (active === "Execute") {
         const userInputwei = ethers.utils.parseEther(threshold);
-        wallet.execute(walletAddress, userInputwei, data256).then((data: any) => {
+        wallet
+          .execute(walletAddress, userInputwei, data256)
+          .then((data: any) => {
+            console.log({ data });
+          });
+      }
+      if (active === "Revoke Rescue Wallet") {
+        wallet
+          .revokeRescueWallet(walletAddress, threshold)
+          .then((data: any) => {
+            console.log({ data });
+          });
+      }
+      if (active === "Transfer ETH") {
+        const userInputwei = ethers.utils.parseEther(data256);
+        wallet.transferETH(walletAddress, userInputwei).then((data: any) => {
           console.log({ data });
         });
       }
-      if (active === 'revokeRescueWallet') {
-        wallet.revokeRescueWallet(walletAddress, threshold).then((data: any) => {
-          console.log({ data });
-        });
-      }
-      if (active === 'transferETH') {
-        wallet.transferETH(walletAddress, data256).then((data: any) => {
-          console.log({ data });
-        });
-      }
-      if (active === 'transferOwnership') {
+      if (active === "Transfer Ownership") {
         wallet.transferOwnership(walletAddress).then((data: any) => {
-            console.log({data})
-          setResultData((prev: any) => ({ ...prev, transferOwnership: 'Transaction successful!!!' }));
-          toast.info('Transaction successful');
+          console.log({ data });
+          setResultData((prev: any) => ({
+            ...prev,
+            transferOwnership: "Transaction successful!!!",
+          }));
+          toast.info("Transaction successful");
         });
       }
+      console.log(resultData);
       setIsLoading(false);
     } catch (err: any) {
       toast.error(err.message);
@@ -163,23 +213,28 @@ const Contracts = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <Navbar height="100%" width={{ sm: 300 }} sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }} p="md">
+    <Box sx={{ display: "flex" }}>
+      <Navbar
+        height="100%"
+        width={{ sm: 300 }}
+        sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.06)" }}
+        p="md"
+      >
         <Navbar.Section grow>{links}</Navbar.Section>
       </Navbar>
       <Box
         sx={{
-          alignSelf: 'center',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignContent: 'center',
-          flexWrap: 'wrap',
+          alignSelf: "center",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignContent: "center",
+          flexWrap: "wrap",
         }}
       >
         <Box w={400}>
-          {active !== 'getDeposite' && (
+          {active !== "Get Deposite" && active !== "Entry Point" && (
             <TextInput
               my={20}
               value={walletAddress}
@@ -187,63 +242,83 @@ const Contracts = () => {
               onChange={(e: any) => setWalletAddress(e.target.value)}
               label="Contract Address"
               placeholder={
-                active == 'addDeposite' ? 'How much you wanna deposit into an entry Contract?' : 'Enter address here'
+                active == "Add Deposite"
+                  ? "How much you wanna deposit into an entry Contract?"
+                  : "Enter address here"
               }
               description={
-                active === 'createWallet' ? '*Enter new contract address or continue with generated one' : ''
+                active === "Create Wallet"
+                  ? "*Enter new contract address or continue with generated one"
+                  : ""
               }
             />
           )}
-          {(active === 'addRescueWallet' || active === 'revokeRescueWallet' || active === 'execute') && (
+          {(active === "Add Rescue Wallet" ||
+            active === "Revoke Rescue Wallet" ||
+            active === "Execute") && (
             <TextInput
               my={20}
               value={threshold}
               defaultValue={threshold}
               onChange={(e: any) => setThreshold(e.target.value)}
-              label={active === 'execute' ? '_value(unit256)' : 'Threshold(unit16)'}
-              placeholder={active === 'execute' ? 'Enter value here' : 'Enter threshold here'}
+              label={active === "Execute" ? "Value" : "Threshold"}
+              placeholder={
+                active === "Execute"
+                  ? "Enter value here"
+                  : "Enter threshold here"
+              }
             />
           )}
-          {(active === 'execute' || active === 'transferETH') && (
+          {(active === "Execute" || active === "Transfer ETH") && (
             <TextInput
               my={20}
-              label={active === 'transferETH' ? 'amount (unit256)' : '_data(bytes)'}
+              label={active === "Transfer ETH" ? "Amount" : "Data"}
               value={data256}
               onChange={(e: any) => setData256(e.target.value)}
-              placeholder={active === 'transferETH' ? 'Enter amount here' : 'Enter data here'}
+              placeholder={
+                active === "Transfer ETH"
+                  ? "Enter amount here"
+                  : "Enter data here"
+              }
             />
           )}
-          <Button
-            sx={{ justifySelf: 'flex-end' }}
-            onClick={generateHandler}
-            disabled={walletAddress === '' || (active !== 'createWallet' && !isWalletCreated)}
-          >
-            {isLoading ? (
-              <Loader variant="dots" color="#fff" />
-            ) : active === 'createWallet' ? (
-              'Create new Wallet'
-            ) : (
-              'Generate ' + active
-            )}
-          </Button>
+
+          {active !== "Entry Point" && (
+            <Button
+              sx={{ justifySelf: "flex-end" }}
+              onClick={generateHandler}
+              disabled={
+                walletAddress === "" ||
+                (active !== "Create Wallet" && !isWalletCreated)
+              }
+            >
+              {isLoading ? (
+                <Loader variant="dots" color="#fff" />
+              ) : active === "Create Wallet" ? (
+                "Create  Wallet"
+              ) : (
+                active
+              )}
+            </Button>
+          )}
 
           {resultData?.[active] &&
-            (active === 'addDeposite' ||
-            active === 'addRescueWallet' ||
-            active === 'setEntryPointAdress' ||
-            active === 'transferOwnership' ? (
+            (active === "Add Deposite" ||
+            active === "Add Rescue Wallet" ||
+            active === "Set EntryPoint Address" ||
+            active === "Transfer Ownership" ? (
               <Text color="grey"> {resultData?.[active]} </Text>
             ) : (
               <Box mt={20} maw={500} mx="auto">
                 <Text color="grey" mb={15}>
-                  Your Generated {active}:{' '}
+                  {active}:{" "}
                 </Text>
                 <Tooltip
                   label={`${active} copied!`}
                   offset={5}
                   position="bottom"
                   radius="xl"
-                  transitionProps={{ duration: 100, transition: 'slide-down' }}
+                  transitionProps={{ duration: 100, transition: "slide-down" }}
                   opened={clipboard.copied}
                 >
                   <Button
