@@ -9,7 +9,7 @@ module.exports = {
     sepolia: {
       url: "https://eth-sepolia.g.alchemy.com/v2/HKPIXNdXAyF4k4UA5fegMXIDtjTWHLR9",
       accounts: [
-        "2bca72c6d87160dd947814cff6cdd145d6f84a2b886a5dc779bb398220bbeb7c",
+        "",
       ],
       saveDeployments: true,
       chainId: 11155111,
@@ -17,7 +17,7 @@ module.exports = {
     avalancheTestnet: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       accounts: [
-        "2bca72c6d87160dd947814cff6cdd145d6f84a2b886a5dc779bb398220bbeb7c",
+        "",
       ],
       saveDeployments: true,
       chainId: 43113,
