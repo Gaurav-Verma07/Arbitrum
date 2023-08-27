@@ -239,13 +239,13 @@ const Contracts = () => {
               value={walletAddress}
               defaultValue={walletAddress}
               onChange={(e: any) => setWalletAddress(e.target.value)}
-              label={ active==='Transfer Ownership' ? 'Enter your new owner wallet' :active==="Add Deposite" ?"Add gas fee to entry contract" :"Contract Address"}
+              label={ active==='Transfer Ownership' ? 'Enter your new owner wallet' :active==="Add Deposite" ?"Add gas fee to entry contract" : active==="Add Rescue Wallet"?"Add rescue wallet":"Contract Address"}
               placeholder={
                 active == "Add Deposite"
                   ? "How much you wanna deposit into an entry Contract?"
                   : "Enter address here"
               }
-              disabled={active==='Add Deposite'}
+              disabled={active==='Add Deposite' }
               description={
                 active === "Create Wallet"
                   ? "*Enter new contract address or continue with generated one"
